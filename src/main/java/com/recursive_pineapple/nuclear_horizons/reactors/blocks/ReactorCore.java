@@ -2,6 +2,7 @@ package com.recursive_pineapple.nuclear_horizons.reactors.blocks;
 
 import java.util.ArrayList;
 
+import com.enderio.core.client.render.IconUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import com.cleanroommc.modularui.factory.GuiFactories;
@@ -20,7 +22,9 @@ import gregtech.api.interfaces.tileentity.IDebugableTileEntity;
 
 public class ReactorCore extends BlockContainer implements IDebugableBlock {
 
-    private IIcon iconTop, iconSideInactive, iconSideActive, iconBottom;
+    public static int renderId;
+
+    private IIcon iconTop, iconBottom, iconSide, iconSideActiveGlow;
 
     public ReactorCore() {
         super(Material.iron);
@@ -34,8 +38,8 @@ public class ReactorCore extends BlockContainer implements IDebugableBlock {
     public void registerBlockIcons(IIconRegister reg) {
         this.iconTop = reg.registerIcon("nuclear_horizons:reactor_core_top");
         this.iconBottom = reg.registerIcon("nuclear_horizons:reactor_core_bottom");
-        this.iconSideInactive = reg.registerIcon("nuclear_horizons:reactor_core_side");
-        this.iconSideActive = reg.registerIcon("nuclear_horizons:reactor_core_side_active");
+        this.iconSide = reg.registerIcon("nuclear_horizons:reactor_core_side");
+        this.iconSideActiveGlow = reg.registerIcon("nuclear_horizons:reactor_core_side_active_glow");
     }
 
     @Override
@@ -48,11 +52,14 @@ public class ReactorCore extends BlockContainer implements IDebugableBlock {
             return iconBottom;
         }
 
-        if (meta == 1) {
-            return iconSideActive;
-        } else {
-            return iconSideInactive;
+        return iconSide;
+    }
+
+    public IIcon getIconGlow(int side, int meta) {
+        if (meta == 1 && side > 1) {
+            return this.iconSideActiveGlow;
         }
+        return null;
     }
 
     @Override
@@ -97,6 +104,11 @@ public class ReactorCore extends BlockContainer implements IDebugableBlock {
         if (getAttachedChambers(worldIn, x, y, z) != te.getChamberCount()) {
             ((TileReactorCore) worldIn.getTileEntity(x, y, z)).queueStructureCheck();
         }
+    }
+
+    @Override
+    public int getRenderType() {
+        return renderId;
     }
 
     @Override
